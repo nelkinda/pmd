@@ -5,9 +5,9 @@
     xsi:schemaLocation="http://pmd.sourceforge.net/rule-tests http://pmd.sourceforge.net/rule-tests_1_0_0.xsd">
     <test-code>
         <description><![CDATA[
-private String, no accessor
+private String, no accessor, non-serializable class
      ]]></description>
-        <expected-problems>1</expected-problems>
+        <expected-problems>0</expected-problems>
         <code><![CDATA[
 public class Foo {
  private String foo;
@@ -17,7 +17,19 @@ public class Foo {
     </test-code>
     <test-code>
         <description><![CDATA[
-private static String
+private String, no accessor, serializable class
+     ]]></description>
+        <expected-problems>1</expected-problems>
+        <code><![CDATA[
+public class Foo implements java.io.Serializable {
+ private String foo;
+ private String bar = foo;
+}
+     ]]></code>
+    </test-code>
+    <test-code>
+        <description><![CDATA[
+private static String, non-serializable class
      ]]></description>
         <expected-problems>0</expected-problems>
         <code><![CDATA[
@@ -29,7 +41,19 @@ public class Foo {
     </test-code>
     <test-code>
         <description><![CDATA[
-private transient String
+private static String, serializable class
+     ]]></description>
+        <expected-problems>0</expected-problems>
+        <code><![CDATA[
+public class Foo implements java.io.Serializable {
+ private static String foo;
+ private String bar = Foo.foo;
+}
+     ]]></code>
+    </test-code>
+    <test-code>
+        <description><![CDATA[
+private transient String, non-serializable class
      ]]></description>
         <expected-problems>0</expected-problems>
         <code><![CDATA[
@@ -41,9 +65,21 @@ public class Foo {
     </test-code>
     <test-code>
         <description><![CDATA[
-getter, no setter
+private transient String, serializable class
      ]]></description>
-        <expected-problems>1</expected-problems>
+        <expected-problems>0</expected-problems>
+        <code><![CDATA[
+public class Foo implements java.io.Serializable {
+ private transient String foo;
+ private String bar = Foo.foo;
+}
+     ]]></code>
+    </test-code>
+    <test-code>
+        <description><![CDATA[
+getter, no setter, non-serializable class
+     ]]></description>
+        <expected-problems>0</expected-problems>
         <code><![CDATA[
 public class Foo {
  private String foo;
@@ -54,9 +90,22 @@ public class Foo {
     </test-code>
     <test-code>
         <description><![CDATA[
-setter, no getter
+getter, no setter, serializable class
      ]]></description>
         <expected-problems>1</expected-problems>
+        <code><![CDATA[
+public class Foo implements java.io.Serializable {
+ private String foo;
+ private String bar = Foo.foo;
+ public String getFoo() {return foo;}
+}
+     ]]></code>
+    </test-code>
+    <test-code>
+        <description><![CDATA[
+setter, no getter, non-serializable class
+     ]]></description>
+        <expected-problems>0</expected-problems>
         <code><![CDATA[
 public class Foo {
  private String foo;
@@ -67,7 +116,20 @@ public class Foo {
     </test-code>
     <test-code>
         <description><![CDATA[
-both accessors, yay!
+setter, no getter, serializable class
+     ]]></description>
+        <expected-problems>1</expected-problems>
+        <code><![CDATA[
+public class Foo implements java.io.Serializable {
+ private String foo;
+ private String bar = Foo.foo;
+ public void setFoo(Foo foo) {this.foo = foo;}
+}
+     ]]></code>
+    </test-code>
+    <test-code>
+        <description><![CDATA[
+both accessors, non-serializable class, yay!
      ]]></description>
         <expected-problems>0</expected-problems>
         <code><![CDATA[
@@ -81,7 +143,21 @@ public class Foo {
     </test-code>
     <test-code>
         <description><![CDATA[
-setFoo and isFoo is OK for booleans
+both accessors, serializable class, yay!
+     ]]></description>
+        <expected-problems>0</expected-problems>
+        <code><![CDATA[
+public class Foo implements java.io.Serializable {
+ private String foo;
+ private String bar = Foo.foo;
+ public void setFoo(Foo foo) {this.foo = foo;}
+ public String getFoo() {return foo;}
+}
+     ]]></code>
+    </test-code>
+    <test-code>
+        <description><![CDATA[
+setFoo and isFoo is OK for booleans, non-serializable class
      ]]></description>
         <expected-problems>0</expected-problems>
         <code><![CDATA[
@@ -94,9 +170,22 @@ public class Foo {
     </test-code>
     <test-code>
         <description><![CDATA[
-setFoo and isFoo is not OK for Strings
+setFoo and isFoo is OK for booleans, serializable class
      ]]></description>
-        <expected-problems>1</expected-problems>
+        <expected-problems>0</expected-problems>
+        <code><![CDATA[
+public class Foo implements java.io.Serializable {
+ private boolean foo;
+ public void setFoo(boolean foo) {this.foo = foo;}
+ public boolean isFoo() {return foo;}
+}
+     ]]></code>
+    </test-code>
+    <test-code>
+        <description><![CDATA[
+setFoo and isFoo is ok for Strings in non-serializable classes
+     ]]></description>
+        <expected-problems>0</expected-problems>
         <code><![CDATA[
 public class Foo {
  private String foo;
@@ -105,8 +194,28 @@ public class Foo {
 }
      ]]></code>
     </test-code>
-    <code-fragment id="prefix"><![CDATA[
+    <test-code>
+        <description><![CDATA[
+setFoo and isFoo is not OK for Strings in serializable classes
+     ]]></description>
+        <expected-problems>1</expected-problems>
+        <code><![CDATA[
+public class Foo implements java.io.Serializable {
+ private String foo;
+ public void setFoo(String foo) {this.foo = foo;}
+ public String isFoo() {return foo;}
+}
+     ]]></code>
+    </test-code>
+    <code-fragment id="prefixNonSer"><![CDATA[
 public class Foo {
+ private String m_foo;
+ public void setFoo(String foo) {m_foo = foo;}
+ public String getFoo() {return m_foo;}
+}
+     ]]></code-fragment>
+    <code-fragment id="prefixSer"><![CDATA[
+public class Foo implements java.io.Serializable {
  private String m_foo;
  public void setFoo(String foo) {m_foo = foo;}
  public String getFoo() {return m_foo;}
@@ -114,30 +223,53 @@ public class Foo {
      ]]></code-fragment>
     <test-code>
         <description><![CDATA[
+prefix is off by default but not checked for non-serializable classes
+     ]]></description>
+        <expected-problems>0</expected-problems>
+        <code-ref id="prefixNonSer"/>
+    </test-code>
+    <test-code>
+        <description><![CDATA[
 prefix is off by default
      ]]></description>
         <expected-problems>1</expected-problems>
-        <code-ref id="prefix"/>
+        <code-ref id="prefixSer"/>
     </test-code>
     <test-code>
         <description><![CDATA[
-valid prefix
+valid prefix in non-serializable class
      ]]></description>
         <rule-property name="prefix">m_</rule-property>
         <expected-problems>0</expected-problems>
-        <code-ref id="prefix"/>
+        <code-ref id="prefixNonSer"/>
     </test-code>
     <test-code>
         <description><![CDATA[
-invalid prefix
+valid prefix in serializable class
+     ]]></description>
+        <rule-property name="prefix">m_</rule-property>
+        <expected-problems>0</expected-problems>
+        <code-ref id="prefixSer"/>
+    </test-code>
+    <test-code>
+        <description><![CDATA[
+invalid prefix in non-serializable class
+     ]]></description>
+        <rule-property name="prefix">xxxxxx</rule-property>
+        <expected-problems>0</expected-problems>
+        <code-ref id="prefixNonSer"/>
+    </test-code>
+    <test-code>
+        <description><![CDATA[
+invalid prefix in serializable class
      ]]></description>
         <rule-property name="prefix">xxxxxx</rule-property>
         <expected-problems>1</expected-problems>
-        <code-ref id="prefix"/>
+        <code-ref id="prefixSer"/>
     </test-code>
     <test-code>
         <description><![CDATA[
-interface
+interface, non-serializable
      ]]></description>
         <expected-problems>0</expected-problems>
         <code><![CDATA[
@@ -149,7 +281,19 @@ public interface Foo {
     </test-code>
     <test-code>
         <description><![CDATA[
-@SuppressWarnings("serial")
+interface, serializable
+     ]]></description>
+        <expected-problems>0</expected-problems>
+        <code><![CDATA[
+public interface Foo extends java.io.Serializable {
+ public String foo;
+ public String bar = foo;
+}
+     ]]></code>
+    </test-code>
+    <test-code>
+        <description><![CDATA[
+@SuppressWarnings("serial") in non-serializable class
      ]]></description>
         <expected-problems>0</expected-problems>
         <code><![CDATA[
@@ -163,11 +307,25 @@ public class Foo {
     </test-code>
     <test-code>
         <description><![CDATA[
+@SuppressWarnings("serial") in serializable class
+     ]]></description>
+        <expected-problems>0</expected-problems>
+        <code><![CDATA[
+@SuppressWarnings("serial")
+public class Foo implements java.io.Serializable {
+ private String foo;
+ private String bar = Foo.foo;
+ public void setFoo(Foo foo) {this.foo = foo;}
+}
+     ]]></code>
+    </test-code>
+    <test-code>
+        <description><![CDATA[
 ClassCastException on generic method
      ]]></description>
         <expected-problems>0</expected-problems>
         <code><![CDATA[
-public abstract class List<A> implements Iterable<A> {
+public abstract class List<A> implements Iterable<A>, java.io.Serializable {
   public static <A> F<List<A>, Boolean> isEmpty() {
     return null;
   }
@@ -178,7 +336,7 @@ public abstract class List<A> implements Iterable<A> {
         <description>#881 private final without setter is flagged</description>
         <expected-problems>0</expected-problems>
         <code><![CDATA[
-public class Foo {
+public class Foo implements java.io.Serializable {
     private final String bar = "BAR";
     public String getBar() { return bar; }
 
@@ -195,7 +353,7 @@ public class Foo {
 import lombok.Data;
 
 @Data
-public class Buzz {
+public class Buzz implements java.io.Serializable {
     private String foo;
 
     public Buzz(String s) {
@@ -209,7 +367,7 @@ public class Buzz {
         <expected-problems>0</expected-problems>
         <code><![CDATA[
 @lombok.Data
-public class Foo {
+public class Foo implements java.io.Serializable {
     private String bar;
 }
         ]]></code>
@@ -220,7 +378,7 @@ public class Foo {
         <code><![CDATA[
 import lombok.*;
 @Data
-public class Foo {
+public class Foo implements java.io.Serializable {
     private String bar;
 }
         ]]></code>
@@ -231,7 +389,7 @@ public class Foo {
         <code><![CDATA[
 import lombok.Getter;
 @Getter
-public class Foo {
+public class Foo implements java.io.Serializable {
     private String bar;
 }
         ]]></code>
@@ -241,7 +399,7 @@ public class Foo {
         <expected-problems>0</expected-problems>
         <code><![CDATA[
 import lombok.Getter;
-public class Foo {
+public class Foo implements java.io.Serializable {
     @Getter private String bar;
 }
         ]]></code>
@@ -251,7 +409,7 @@ public class Foo {
         <expected-problems>0</expected-problems>
         <code><![CDATA[
 import lombok.Getter;
-public class Foo {
+public class Foo implements java.io.Serializable {
     @Getter(lazy=true) private String bar;
 }
         ]]></code>
@@ -261,7 +419,7 @@ public class Foo {
         <expected-problems>0</expected-problems>
         <code><![CDATA[
 @Data
-public class Foo {
+public class Foo implements java.io.Serializable {
     private String bar;
 }
         ]]></code>
@@ -272,7 +430,7 @@ public class Foo {
         <code><![CDATA[
 import lombok.experimental.Delegate;
 
-public class Foo {
+public class Foo implements java.io.Serializable {
     @Delegate
     private String bar;
 

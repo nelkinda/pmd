@@ -16,6 +16,7 @@ import org.apache.commons.lang3.StringUtils;
 
 import net.sourceforge.pmd.lang.ast.Node;
 import net.sourceforge.pmd.lang.java.ast.ASTClassOrInterfaceDeclaration;
+import net.sourceforge.pmd.lang.java.ast.ASTClassOrInterfaceType;
 import net.sourceforge.pmd.lang.java.ast.ASTCompilationUnit;
 import net.sourceforge.pmd.lang.java.ast.ASTMethodDeclaration;
 import net.sourceforge.pmd.lang.java.ast.ASTMethodDeclarator;
@@ -76,6 +77,10 @@ public class BeanMembersShouldSerializeRule extends AbstractLombokAwareRule {
             return super.visit(node, data);
         }
 
+        if (!isSerializable(node)) {
+            return super.visit(node, data);
+        }
+
         Map<MethodNameDeclaration, List<NameOccurrence>> methods = node.getScope().getEnclosingScope(ClassScope.class)
                 .getMethodDeclarations();
         List<ASTMethodDeclarator> getSetMethList = new ArrayList<>(methods.size());
@@ -110,6 +115,16 @@ public class BeanMembersShouldSerializeRule extends AbstractLombokAwareRule {
             }
         }
         return super.visit(node, data);
+    }
+
+    private boolean isSerializable(ASTClassOrInterfaceDeclaration node) {
+        List<ASTClassOrInterfaceType> superInterfacesTypeNodes = node.getSuperInterfacesTypeNodes();
+        for (ASTClassOrInterfaceType superInterfacesTypeNode : superInterfacesTypeNodes) {
+            if (superInterfacesTypeNode.getType().isAssignableFrom(java.io.Serializable.class)) {
+                return true;
+            }
+        }
+        return false;
     }
 
     private String trimIfPrefix(String img) {
